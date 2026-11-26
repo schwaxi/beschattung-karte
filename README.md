@@ -42,6 +42,7 @@ die Tasten (Automatik, Auf, Stopp, Ab) stehen rechts in der Kopfzeile neben dem 
   automatik: switch.essbereichtuer # optional
   lamellen: true                   # optional, Standard: true wenn die Beschattung Lamellen hat
   schritte: 7                      # optional, Lamellenstufen
+  leistung: sensor.beschattung_essbereichtuer_leistung # optional, Watt hinter dem Namen, solange er faehrt
 ```
 
 ## Lizenz

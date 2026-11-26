@@ -1,4 +1,4 @@
-// beschattung-karte v1.0.1
+// beschattung-karte v1.0.2
 // Einzeln installierbares Modul (Home Assistant Marketplace / HACS, Kategorie Dashboard).
 window.customCards = window.customCards || [];
 window.customCardFeatures = window.customCardFeatures || [];
@@ -294,6 +294,7 @@ if (!window.customCardFeatures.some((f) => f.type === TYPE2)) {
 //   automatik: switch.essbereichtuer # optional
 //   lamellen: true                   # optional, Standard: true wenn die Beschattung Lamellen hat
 //   schritte: 7                      # optional, Lamellenstufen
+//   leistung: sensor.beschattung_essbereichtuer_leistung  # optional, Watt hinter dem Namen, solange er faehrt
 
 const TYPE3 = "beschattung-karte";
 const TASTE_NORMAL = 48, ABSTAND_NORMAL = 12, TASTE_KOMPAKT = 36, ABSTAND_KOMPAKT = 6, TASTE_ENG = 32, ABSTAND_ENG = 4;
@@ -309,9 +310,26 @@ class BeschattungKarte extends HTMLElement {
   set hass(hass) {
     const erst = !this._hass;
     this._hass = hass;
+    this._leistungAnzeigen();
     if (this._tile) this._tile.hass = hass;
     if (this._steu) this._steu.hass = hass;
     if (erst || !this._tile) this._pruefen();
+  }
+
+  // Optional: Leistung waehrend der Fahrt hinter dem Namen ("Kueche · 105 W"), sonst nur der Name
+  _leistungText() {
+    const id = this._config?.leistung;
+    const w = id && this._hass ? parseFloat(this._hass.states[id]?.state) : NaN;
+    return w > 0 ? ` · ${Math.round(w)} W` : "";
+  }
+  _leistungAnzeigen() {
+    if (!this._config?.leistung || !this._tile || !this._tileCfg) return;
+    const t = this._leistungText();
+    if (t === this._wText) return;
+    this._wText = t;
+    const s = this._hass?.states[this._config.entity];
+    const name = (this._config.name || s?.attributes?.friendly_name || this._config.entity) + t;
+    this._tile.setConfig({ ...this._tileCfg, name });
   }
 
   connectedCallback() {
@@ -377,6 +395,9 @@ class BeschattungKarte extends HTMLElement {
       if (c.name) tileCfg.name = c.name;
       if (c.color) tileCfg.color = c.color;
       if (c.icon) tileCfg.icon = c.icon;
+      this._tileCfg = { ...tileCfg };
+      this._wText = this._leistungText();
+      if (this._wText) tileCfg.name = (c.name || this._hass.states[c.entity]?.attributes?.friendly_name || c.entity) + this._wText;
       const tile = helpers.createCardElement(tileCfg);
       tile.hass = this._hass;
 
