@@ -1,4 +1,4 @@
-// beschattung-karte v1.0.0
+// beschattung-karte v1.0.1
 // Einzeln installierbares Modul (Home Assistant Marketplace / HACS, Kategorie Dashboard).
 window.customCards = window.customCards || [];
 window.customCardFeatures = window.customCardFeatures || [];
@@ -206,6 +206,8 @@ class BeschattungSteuerung extends HTMLElement {
           --control-button-group-spacing: var(--beschattung-tasten-abstand, 12px);
           --control-button-group-thickness: var(--feature-height, 42px);
           height: var(--feature-height, 42px);
+          max-width: var(--beschattung-tasten-max-breite, none);
+          margin-left: auto;
         }
         ha-control-button {
           --control-button-border-radius: var(--feature-border-radius, 12px);
@@ -294,7 +296,7 @@ if (!window.customCardFeatures.some((f) => f.type === TYPE2)) {
 //   schritte: 7                      # optional, Lamellenstufen
 
 const TYPE3 = "beschattung-karte";
-const TASTE_NORMAL = 48, ABSTAND_NORMAL = 12, TASTE_KOMPAKT = 36, ABSTAND_KOMPAKT = 6;
+const TASTE_NORMAL = 48, ABSTAND_NORMAL = 12, TASTE_KOMPAKT = 36, ABSTAND_KOMPAKT = 6, TASTE_ENG = 32, ABSTAND_ENG = 4;
 
 class BeschattungKarte extends HTMLElement {
   setConfig(config) {
@@ -348,9 +350,11 @@ class BeschattungKarte extends HTMLElement {
     const n = this._anzahlTasten();
     const normal = n * TASTE_NORMAL + (n - 1) * ABSTAND_NORMAL;
     const kompakt = n * TASTE_KOMPAKT + (n - 1) * ABSTAND_KOMPAKT;
+    const eng = n * TASTE_ENG + (n - 1) * ABSTAND_ENG;
     let modus, b = 0;
     if (frei >= normal) { modus = "normal"; b = Math.min(frei, 360); }
     else if (frei >= kompakt) { modus = "kompakt"; b = frei; }
+    else if (frei >= eng) { modus = "eng"; b = frei; }
     else modus = "unten";
     if (modus !== this._modus) this._bauen(modus, b);
     else if (this._tasten && modus !== "unten") this._tasten.style.width = `${b}px`;
@@ -379,13 +383,18 @@ class BeschattungKarte extends HTMLElement {
       if (!this.shadowRoot) this.attachShadow({ mode: "open" });
       this.shadowRoot.innerHTML = `
         <style>
-          :host { display: block; }
+          :host {
+            display: block;
+            /* stehen die Tasten in einer eigenen Zeile, nicht breiter als im Normalfall */
+            --beschattung-tasten-max-breite: ${this._anzahlTasten() * TASTE_NORMAL + (this._anzahlTasten() - 1) * ABSTAND_NORMAL}px;
+          }
           .wrap { position: relative; height: 100%; }
           .tasten {
             position: absolute; top: 7px; right: 12px;
             --feature-height: 42px; --feature-border-radius: 12px;
           }
           .tasten.kompakt { --beschattung-tasten-abstand: ${ABSTAND_KOMPAKT}px; }
+          .tasten.eng { --beschattung-tasten-abstand: ${ABSTAND_ENG}px; }
         </style>
         <div class="wrap"></div>`;
       const wrap = this.shadowRoot.querySelector(".wrap");
@@ -459,4 +468,4 @@ if (!window.customCards.some((c) => c.type === TYPE3)) {
 }
 }
 
-console.info("%c beschattung-karte %c v1.0.0 ", "color:#fff;background:#03a9f4;font-weight:700", "color:#03a9f4");
+console.info("%c beschattung-karte %c v1.0.1 ", "color:#fff;background:#03a9f4;font-weight:700", "color:#03a9f4");
