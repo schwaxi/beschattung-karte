@@ -1,4 +1,4 @@
-// beschattung-karte v1.0.2
+// beschattung-karte v1.0.3
 // Einzeln installierbares Modul (Home Assistant Marketplace / HACS, Kategorie Dashboard).
 window.customCards = window.customCards || [];
 window.customCardFeatures = window.customCardFeatures || [];
@@ -457,7 +457,7 @@ class BeschattungKarte extends HTMLElement {
 
 if (!customElements.get(TYPE3)) customElements.define(TYPE3, BeschattungKarte);
 if (!window.customCards.some((c) => c.type === TYPE3)) {
-  window.customCards.push({ type: TYPE3, name: "Beschattung Karte", description: "Raffstore/Rollladen mit Automatik, Auf/Stopp/Ab und Lamellenstufen" });
+  window.customCards.push({ type: TYPE3, name: "Beschattung Karte", description: "Raffstore/Rollladen mit Automatik, Auf/Stopp/Ab und Lamellenstufen", preview: true });
 }
 
 // Eingabemaske (visueller Editor) und Startwerte
